@@ -342,6 +342,8 @@ function toggleTitleButtons(enabled) {
 
 function onStatus(session, { state, text }) {
   if (app.session !== session) return;
+  // For a guest, "offline" means the host's browser is unreachable, not solo play.
+  if (session.kind === 'p2p-guest' && state === 'offline') state = 'reconnecting';
   session.ui?.setNet(state, text);
   if (!session.started) {
     if (state === 'failed') {
@@ -350,7 +352,7 @@ function onStatus(session, { state, text }) {
     } else if (text) {
       setTitleStatus(text);
     }
-    if (session.kind === 'p2p-guest' && state === 'offline') showCancel();
+    if (session.kind === 'p2p-guest' && /not online/.test(text)) showCancel();
   } else if (state === 'failed' || state === 'reconnecting' || state === 'id-taken') {
     session.ui?.toast(text, state === 'failed' ? 'error' : 'info', 4000);
   }

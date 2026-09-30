@@ -315,11 +315,13 @@ test('a saved world loads back into the same world', () => {
   // Garbage entities are dropped rather than trusted.
   const bad = clone(saved);
   bad.settlements[999999] = { id: 999999, race: 12345, i: 0, size: 99 };
-  bad.players[5] = { id: 5, name: '<b>x</b>‮', color: 'red', domain: 'nope' };
+  // A bidi override (U+202E) must not survive into a displayed name.
+  bad.players[5] = { id: 5, name: `<b>x</b>${String.fromCharCode(0x202e)}`, color: 'red', domain: 'nope' };
   const fixed = normalizeState(bad);
   assert.equal(fixed.settlements[999999], undefined);
   assert.equal(fixed.players[5].color, R.GOD_COLORS[0]);
   assert.equal(fixed.players[5].domain, 'earth');
+  assert.equal(fixed.players[5].name, '<b>x</b>');
 });
 
 // Plays whole games with bots doing random deeds, and checks after every step
