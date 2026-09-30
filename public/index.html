@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>CTB World</title>
+    <meta name="description" content="A multiplayer world-building game: shape a world with your friends, awaken peoples, and write the chronicle of three Ages." />
+    <meta name="theme-color" content="#0f1420" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="vendor/peerjs.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body>
+    <noscript><p class="noscript">CTB World needs JavaScript to run.</p></noscript>
+
+    <!-- Title screen -->
+    <main id="title" class="screen title-screen">
+      <canvas id="title-bg" aria-hidden="true"></canvas>
+      <div class="title-card">
+        <header class="brand">
+          <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="#glyph-world" /></svg>
+          <h1>CTB World</h1>
+          <p class="tagline">Shape a world together. Raise mountains, awaken peoples, and write the chronicle of three Ages.</p>
+        </header>
+
+        <section class="profile" aria-label="Your god">
+          <label class="field">
+            <span>Your name as a god</span>
+            <input id="profile-name" maxlength="20" autocomplete="nickname" placeholder="e.g. Ilyra" spellcheck="false" />
+          </label>
+          <div class="field">
+            <span>Your colour</span>
+            <div id="profile-colors" class="swatches" role="radiogroup" aria-label="Colour"></div>
+          </div>
+          <div class="field">
+            <span>Your domain</span>
+            <div id="profile-domains" class="domains" role="radiogroup" aria-label="Domain"></div>
+            <p id="domain-perk" class="domain-perk"></p>
+          </div>
+        </section>
+
+        <section class="entry">
+          <div class="entry-row">
+            <button id="btn-create" class="btn primary big">Create a world</button>
+            <button id="btn-solo" class="btn big">Play alone</button>
+          </div>
+          <form id="join-form" class="join-row" autocomplete="off">
+            <input id="join-code" maxlength="7" placeholder="World code" aria-label="World code" spellcheck="false" autocapitalize="characters" />
+            <button id="btn-join" class="btn big" type="submit">Join</button>
+          </form>
+          <div id="resume-row" class="resume-row" hidden>
+            <button id="btn-resume" class="btn big wide"></button>
+            <button id="btn-forget" class="btn ghost small" title="Forget this saved world">Forget</button>
+          </div>
+          <p id="title-status" class="status-line" role="status" aria-live="polite"></p>
+        </section>
+
+        <footer class="title-foot">
+          <button id="btn-howto" class="link">How to play</button>
+          <span class="dot">·</span>
+          <span id="net-mode" class="muted"></span>
+          <span class="dot">·</span>
+          <a href="https://github.com/ctbot000/ctb-world" target="_blank" rel="noopener">Source</a>
+        </footer>
+      </div>
+    </main>
+
+    <!-- The world -->
+    <div id="world" class="screen world-screen" hidden>
+      <header class="topbar">
+        <div class="tb-left">
+          <button id="btn-menu" class="icon-btn" aria-label="Menu" title="Menu">☰</button>
+          <div class="world-title">
+            <strong id="hud-world">World</strong>
+            <span id="hud-age" class="muted"></span>
+          </div>
+        </div>
+        <div class="tb-center">
+          <div id="hud-timer" class="timer" title="Time left in this round" hidden></div>
+          <div id="hud-power" class="power" title="Your power: spend it on deeds. It refills every round."></div>
+          <button id="btn-ready" class="btn primary" hidden>End turn</button>
+        </div>
+        <div class="tb-right">
+          <span id="net-pill" class="pill" title="Connection"></span>
+          <button id="btn-sound" class="icon-btn" aria-label="Sound" title="Sound on/off">🔊</button>
+          <button id="btn-help" class="icon-btn" aria-label="How to play" title="How to play">?</button>
+          <button id="btn-panel" class="icon-btn panel-toggle" aria-label="Show panel" title="Show panel">☷</button>
+        </div>
+      </header>
+
+      <nav id="toolbar" class="toolbar" aria-label="Deeds"></nav>
+      <div id="tool-options" class="tool-options" hidden></div>
+
+      <section class="map-wrap" aria-label="Map">
+        <canvas id="map" tabindex="0" aria-label="World map"></canvas>
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+        <div id="inspector" class="inspector" hidden></div>
+        <div class="map-controls">
+          <button id="btn-zoom-in" class="icon-btn" aria-label="Zoom in" title="Zoom in">+</button>
+          <button id="btn-zoom-out" class="icon-btn" aria-label="Zoom out" title="Zoom out">−</button>
+          <button id="btn-fit" class="icon-btn" aria-label="Fit map" title="Show the whole world">⤢</button>
+        </div>
+        <canvas id="minimap" class="minimap" aria-hidden="true"></canvas>
+      </section>
+
+      <aside id="sidebar" class="sidebar">
+        <section id="lobby" class="lobby" hidden></section>
+        <div id="tabs" class="tabs" role="tablist">
+          <button role="tab" data-tab="gods" aria-selected="true">Gods</button>
+          <button role="tab" data-tab="peoples">Peoples</button>
+          <button role="tab" data-tab="chronicle">Chronicle</button>
+          <button role="tab" data-tab="chat">Chat <span id="chat-badge" class="badge" hidden></span></button>
+        </div>
+        <section id="tab-gods" class="tab-panel" role="tabpanel"></section>
+        <section id="tab-peoples" class="tab-panel" role="tabpanel" hidden></section>
+        <section id="tab-chronicle" class="tab-panel" role="tabpanel" hidden></section>
+        <section id="tab-chat" class="tab-panel chat" role="tabpanel" hidden>
+          <ol id="chat-log" class="chat-log"></ol>
+          <form id="chat-form" class="chat-form" autocomplete="off">
+            <input id="chat-input" maxlength="280" placeholder="Say something…" aria-label="Chat message" />
+            <button class="btn" type="submit">Send</button>
+          </form>
+        </section>
+      </aside>
+    </div>
+
+    <!-- Dialogs -->
+    <dialog id="dlg" class="dialog"></dialog>
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="glyph-world" viewBox="0 0 64 64">
+        <path d="M32 3 57 17.5v29L32 61 7 46.5v-29Z" fill="#1d4c79" stroke="#e2b659" stroke-width="3" stroke-linejoin="round" />
+        <path d="M18 38c4-9 9-4 12-11 3-6 9-9 15-5 3 2 2 7-1 9-5 3-3 8-9 10-6 3-14 3-17-3Z" fill="#94c263" />
+        <path d="M27 31l5-8 5 8Z" fill="#91877e" />
+        <path d="M30.2 26l1.8-3 1.8 3Z" fill="#f4f1e8" />
+        <path d="M20 40c3 1 6 0 9-2" fill="none" stroke="#3a7db6" stroke-width="1.6" stroke-linecap="round" />
+      </symbol>
+    </svg>
+  </body>
+</html>

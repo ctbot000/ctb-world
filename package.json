@@ -1,0 +1,25 @@
+{
+  "name": "ctb-world",
+  "version": "1.0.0",
+  "description": "A multiplayer world-building game for the browser: shape a world together, awaken peoples, and write its chronicle.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "vendor": "node scripts/vendor.mjs",
+    "test": "node --test --test-timeout=120000 --test-force-exit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctbot000/ctb-world.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "peer": "1.0.2",
+    "peerjs": "1.5.5",
+    "puppeteer-core": "25.12.0"
+  }
+}
